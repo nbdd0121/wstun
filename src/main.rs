@@ -84,6 +84,7 @@ async fn connect(opt: &ConnectOpt) -> Result<()> {
 
     loop {
         let mut backoff = Duration::from_secs(1);
+        const MAX_BACKOFF: Duration = Duration::from_secs(60);
         let ws_stream = loop {
             // This is to replicate what's being done by tungstenite.
             // We have to build our own `http::Request` so that we can add authorization header.
@@ -119,7 +120,7 @@ async fn connect(opt: &ConnectOpt) -> Result<()> {
                     }
 
                     tokio::time::sleep(backoff).await;
-                    backoff *= 2;
+                    backoff = core::cmp::min(backoff * 2, MAX_BACKOFF);
                 }
             }
         };
