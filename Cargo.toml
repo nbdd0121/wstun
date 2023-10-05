@@ -1,0 +1,17 @@
+[package]
+name = "wstun"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+http = "0.2"
+tokio-tungstenite = { version = "0.20", features = ["rustls-tls-webpki-roots"] }
+tungstenite = "0.20"
+data-encoding = "2"
+anyhow = "1"
+log = "0.4"
+env_logger = "0.10"
+tokio = { version = "1", features = ["net", "time", "macros", "rt-multi-thread"] }
+futures = "0.3"
+tokio-tun = "0.9"
