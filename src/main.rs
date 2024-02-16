@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::{Context, Result};
@@ -145,9 +146,11 @@ async fn connect(opt: &ConnectOpt) -> Result<()> {
 }
 
 async fn bind(opt: &BindOpt) -> Result<()> {
-    let tun = TunBuilder::new().name(&opt.tun).up().try_build()?;
+    let tun = Arc::new(TunBuilder::new().name(&opt.tun).up().try_build()?);
     let listener = tokio::net::TcpListener::bind(&opt.address).await?;
     log::info!("Listening on: {}", opt.address);
+
+    let mut conn: Option<tokio::task::JoinHandle<_>> = None;
 
     loop {
         let (stream, peer) = listener.accept().await?;
@@ -167,15 +170,21 @@ async fn bind(opt: &BindOpt) -> Result<()> {
         };
         log::info!("Connection established");
 
-        match handle_connection(ws_stream, &tun).await {
-            Ok(()) => {
-                log::info!("Connection closed");
-                break;
-            }
-            Err(err) => {
-                log::error!("Error: {}", err);
-            }
+        if let Some(conn) = conn {
+            conn.abort();
         }
+
+        let tun_clone = tun.clone();
+        conn = Some(tokio::spawn(async move {
+            match handle_connection(ws_stream, &tun_clone).await {
+                Ok(()) => {
+                    log::info!("Connection closed");
+                }
+                Err(err) => {
+                    log::error!("Error: {}", err);
+                }
+            }
+        }));
 
         if opt.once {
             break;
