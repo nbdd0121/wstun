@@ -65,7 +65,7 @@ where
             let packet_len = tun.recv(&mut packet).await?;
             packet.truncate(packet_len);
 
-            send.feed(Message::Binary(packet)).await?;
+            send.feed(Message::Binary(packet.into())).await?;
             send.flush().await?;
         }
         // This is a type inference guide.
@@ -79,7 +79,7 @@ where
 }
 
 async fn connect(opt: &ConnectOpt) -> Result<()> {
-    let tun = TunBuilder::new().name(&opt.tun).up().try_build()?;
+    let tun = TunBuilder::new().name(&opt.tun).up().build()?.pop().unwrap();
 
     let uri: Uri = opt.url.parse()?;
 
@@ -146,7 +146,7 @@ async fn connect(opt: &ConnectOpt) -> Result<()> {
 }
 
 async fn bind(opt: &BindOpt) -> Result<()> {
-    let tun = Arc::new(TunBuilder::new().name(&opt.tun).up().try_build()?);
+    let tun = Arc::new(TunBuilder::new().name(&opt.tun).up().build()?.pop().unwrap());
     let listener = tokio::net::TcpListener::bind(&opt.address).await?;
     log::info!("Listening on: {}", opt.address);
 

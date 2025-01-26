@@ -5,13 +5,13 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
-http = "0.2"
-tokio-tungstenite = { version = "0.20", features = ["rustls-tls-webpki-roots"] }
-tungstenite = "0.20"
+http = "1"
+tokio-tungstenite = { version = "0.26", features = ["rustls-tls-webpki-roots"] }
+tungstenite = "0.26"
 data-encoding = "2"
 anyhow = "1"
 log = "0.4"
 env_logger = "0.11"
 tokio = { version = "1", features = ["net", "time", "macros", "rt-multi-thread"] }
 futures = "0.3"
-tokio-tun = "0.9"
+tokio-tun = "0.13"
