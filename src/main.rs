@@ -79,7 +79,14 @@ where
 }
 
 async fn connect(opt: &ConnectOpt) -> Result<()> {
-    let tun = TunBuilder::new().name(&opt.tun).up().build()?.pop().unwrap();
+    let tun = TunBuilder::new()
+        .name(&opt.tun)
+        .packet_info()
+        .up()
+        .build()
+        .context("Failed to create tunnel")?
+        .pop()
+        .unwrap();
 
     let uri: Uri = opt.url.parse()?;
 
@@ -146,7 +153,15 @@ async fn connect(opt: &ConnectOpt) -> Result<()> {
 }
 
 async fn bind(opt: &BindOpt) -> Result<()> {
-    let tun = Arc::new(TunBuilder::new().name(&opt.tun).up().build()?.pop().unwrap());
+    let tun = Arc::new(
+        TunBuilder::new()
+            .name(&opt.tun)
+            .packet_info()
+            .up()
+            .build()?
+            .pop()
+            .unwrap(),
+    );
     let listener = tokio::net::TcpListener::bind(&opt.address).await?;
     log::info!("Listening on: {}", opt.address);
 
